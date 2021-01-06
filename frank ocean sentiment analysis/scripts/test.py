@@ -15,7 +15,7 @@ else:
     print("Include your username after running %s please..." % (sys.argv[0],))
     sys.exit()
 
-token = util.prompt_for_user_token(username,scope,client_id='911b425bc8c3496297b0a66d3df0b236',client_secret='5f581823761649768f3ca1d3a7cfc6de',redirect_uri='http://google.com/')
+token = util.prompt_for_user_token(username,scope,client_id='911b425bc8c3496297b0a66d3df0b236',client_secret='HIDDEN FOR PRIVACY',redirect_uri='http://google.com/')
 
 if token:
     spotify = spotipy.Spotify(auth=token)
