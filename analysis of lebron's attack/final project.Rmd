@@ -1,0 +1,606 @@
+---
+title: 'Final Project: Sports'
+author: "Ferdie Taruc"
+output: pdf_document
+fig_width: 5
+fig_height: 3
+always_allow_html: true
+---
+
+```{r include=FALSE,results='hide'}
+library(astsa)
+library(forecast)
+library(knitr)
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+\vspace{-5truemm}
+
+
+<!-- The following script adds the PACF to sarima() -->
+```{r ECHO = FALSE, include=FALSE}
+sarima_wPACF = function (xdata, p, d, q, P = 0, D = 0, Q = 0, S = -1, details = TRUE, 
+          xreg = NULL, Model = TRUE, fixed = NULL, tol = sqrt(.Machine$double.eps), 
+          no.constant = FALSE, max.lag = -1) 
+{
+  layout = graphics::layout
+  par = graphics::par
+  plot = graphics::plot
+  grid = graphics::grid
+  title = graphics::title
+  polygon = graphics::polygon
+  abline = graphics::abline
+  lines = graphics::lines
+  frequency = stats::frequency
+  coef = stats::coef
+  dnorm = stats::dnorm
+  ppoints = stats::ppoints
+  qnorm = stats::qnorm
+  time = stats::time
+  na.pass = stats::na.pass
+  trans = ifelse(is.null(fixed), TRUE, FALSE)
+  trc = ifelse(details, 1, 0)
+  n = length(xdata)
+  if (is.null(xreg)) {
+    constant = 1:n
+    xmean = rep(1, n)
+    if (no.constant == TRUE) 
+      xmean = NULL
+    if (d == 0 & D == 0) {
+      fitit = stats::arima(xdata, order = c(p, d, q), seasonal = list(order = c(P, 
+                                                                                D, Q), period = S), xreg = xmean, include.mean = FALSE, 
+                           fixed = fixed, trans = trans, optim.control = list(trace = trc, 
+                                                                              REPORT = 1, reltol = tol))
+    }
+    else if (xor(d == 1, D == 1) & no.constant == FALSE) {
+      fitit = stats::arima(xdata, order = c(p, d, q), seasonal = list(order = c(P, 
+                                                                                D, Q), period = S), xreg = constant, fixed = fixed, 
+                           trans = trans, optim.control = list(trace = trc, 
+                                                               REPORT = 1, reltol = tol))
+    }
+    else fitit = stats::arima(xdata, order = c(p, d, q), 
+                              seasonal = list(order = c(P, D, Q), period = S), 
+                              include.mean = !no.constant, fixed = fixed, trans = trans, 
+                              optim.control = list(trace = trc, REPORT = 1, reltol = tol))
+  }
+  if (!is.null(xreg)) {
+    fitit = stats::arima(xdata, order = c(p, d, q), seasonal = list(order = c(P, 
+                                                                              D, Q), period = S), xreg = xreg, fixed = fixed, trans = trans, 
+                         optim.control = list(trace = trc, REPORT = 1, reltol = tol))
+  }
+  if (details) {
+    old.par <- par(no.readonly = TRUE)
+    layout(matrix(c(1, 2, 4, 1, 3, 5), ncol = 2))
+    par(mar = c(2.2, 2, 1, 0.25) + 0.5, mgp = c(1.6, 0.6, 
+                                                0))
+    
+    ## Standardized residuals
+    
+    rs <- fitit$residuals
+    stdres <- rs/sqrt(fitit$sigma2)
+    num <- sum(!is.na(rs))
+    plot.ts(stdres, main = "Standardized Residuals", ylab = "")
+    if (Model) {
+      if (S < 0) {
+        title(paste("Model: (", p, ",", d, ",", q, ")", 
+                    sep = ""), adj = 0)
+      }
+      else {
+        title(paste("Model: (", p, ",", d, ",", q, ") ", 
+                    "(", P, ",", D, ",", Q, ") [", S, "]", sep = ""), 
+              adj = 0)
+      }
+    }
+    
+    ## ACF
+    
+    alag <- max(10 + sqrt(num), 3 * S, max.lag)
+    ACF = stats::acf(rs, alag, plot = FALSE, na.action = na.pass)$acf[-1]
+    LAG = 1:alag/frequency(xdata)
+    L = 2/sqrt(num)
+    plot(LAG, ACF, type = "h"
+         , ylim = c(min(ACF) - 0.1, min(1,  max(ACF + 0.4)))
+         , main = "ACF of Residuals")
+    abline(h = c(0, -L, L), lty = c(1, 2, 2), col = c(1,4, 4))
+    
+    ## Q-Q Plot
+    
+    stats::qqnorm(stdres, main = "Normal Q-Q Plot of Std Residuals")
+    sR <- !is.na(stdres)
+    ord <- order(stdres[sR])
+    ord.stdres <- stdres[sR][ord]
+    PP <- stats::ppoints(num)
+    z <- stats::qnorm(PP)
+    y <- stats::quantile(ord.stdres, c(0.25, 0.75), names = FALSE, 
+                         type = 7, na.rm = TRUE)
+    x <- stats::qnorm(c(0.25, 0.75))
+    b <- diff(y)/diff(x)
+    a <- y[1L] - b * x[1L]
+    abline(a, b, col = 4)
+    SE <- (b/dnorm(z)) * sqrt(PP * (1 - PP)/num)
+    qqfit <- a + b * z
+    U <- qqfit + 3.9 * SE
+    L <- qqfit - 3.9 * SE
+    z[1] = z[1] - 0.1
+    z[length(z)] = z[length(z)] + 0.1
+    xx <- c(z, rev(z))
+    yy <- c(L, rev(U))
+    polygon(xx, yy, border = NA, col = gray(0.6, alpha = 0.2))
+    
+    
+    ## PACF
+    
+    alag <- max(10 + sqrt(num), 3 * S, max.lag)
+    PACF = stats::pacf(rs, alag, plot = FALSE, na.action = na.pass)$acf
+    LAG = 1:alag/frequency(xdata)
+    L = 2/sqrt(num)
+    plot(LAG, PACF, type = "h", ylim = c(min(PACF) - 0.1, min(1,max(PACF + 0.4))), 
+         main = "PACF of Residuals")
+    abline(h = c(0, -L, L), lty = c(1, 2, 2), col = c(1,4, 4))
+    
+    
+    ##?
+    
+    nlag <- ifelse(S < 7, 20, 3 * S)
+    ppq <- p + q + P + Q - sum(!is.na(fixed))
+    if (nlag < ppq + 8) {
+      nlag = ppq + 8
+    }
+    pval <- numeric(nlag)
+    for (i in (ppq + 1):nlag) {
+      u <- stats::Box.test(rs, i, type = "Ljung-Box")$statistic
+      pval[i] <- stats::pchisq(u, i - ppq, lower.tail = FALSE)
+    }
+    plot((ppq + 1):nlag, pval[(ppq + 1):nlag], xlab = "LAG (H)", 
+         ylab = "p value", ylim = c(-0.1, 1), main = "p values for Ljung-Box statistic")
+    abline(h = 0.05, lty = 2, col = "blue")
+    on.exit(par(old.par))
+  }
+  if (is.null(fixed)) {
+    coefs = fitit$coef
+  }
+  else {
+    coefs = fitit$coef[is.na(fixed)]
+  }
+  dfree = fitit$nobs - length(coefs)
+  t.value = coefs/sqrt(diag(fitit$var.coef))
+  p.two = stats::pf(t.value^2, df1 = 1, df2 = dfree, lower.tail = FALSE)
+  ttable = cbind(Estimate = coefs, SE = sqrt(diag(fitit$var.coef)), 
+                 t.value, p.value = p.two)
+  ttable = round(ttable, 4)
+  k = length(coefs)
+  n = n - (d + D)
+  BIC = stats::BIC(fitit)/n
+  AIC = stats::AIC(fitit)/n
+  AICc = (n * AIC + ((2 * k^2 + 2 * k)/(n - k - 1)))/n
+  list(fit = fitit, degrees_of_freedom = dfree, ttable = ttable, 
+       AIC = AIC, AICc = AICc, BIC = BIC)
+}
+```
+
+
+<font size = "+4">**Executive Summary: **</font> 
+
+ $\color{red}{\text{Disclaimer:}}$ this version does not edit any of the suggestions to change for the final version from Checkpoint #1. I will re-do most sections for the final submission (like the EDA portion that highlights only shot selection) as well as most figures are improperly labeled; the only changes made were 4 ARMA models with the two sections(Model Comparison/Selection & Results) for Checkpoint 2. 
+
+|      In this analysis, we are determining the next 10 "ATTACK" or willingness to "attack the basket" metric score of Lebron James based on his 2003-2019 career games. Assuming that Lebron's body also deteriorates like many other athletes (honestly doesn't seem as true), then his willingness to attack the paint should decrease over time since it takes a toll on his body. There also seems to not be seasonal effects that can be captured easily among each season, as he performs fairly equally on average across every month and day played.
+
+## 1: Exploratory Data Analysis
+
+```{r, echo = FALSE}
+#Let's load the data:
+sports = read.csv("~/stat153data/projectdata_sports.csv")
+#total_rows = nrow(sports) = 1188 total rows
+
+#sports$Date[1] #beginning date: 10/29/03
+#sports$Date[1188] #ending date: 3/2/19
+```
+
+There are a total of 1188 games being analyzed, starting from his '03 season on 10/29/03 and ending in his '19 season on 3/2/19. Let's try to first understand what the "ATTACK" metric uses from game statistics (let's first assume that "willingness to attack" refers to shots in the paint or non 3-point shots).
+
+If we analyze these specific games through basketball-references.com, we find Lebron's statistics on:
+2/25/11: had his highest ATTACK against the Wizards (with 1 3PA, 0 made)
+3/12/17: had his lowest ATTACK against the Rockets (with 11 3PA, 4 made)
+
+What is strange is when we look at the shot selection for his best "attack" game, he barely makes it in the paint compared to his "worst" game. I suppose three pointers made/attempted heavily affect this metric.
+
+```{r, echo = FALSE, out.width="250px", out.height="250px"}
+#knitr::opts_chunk$set(fig.width=3, fig.height=5) 
+
+t = 1:nrow(sports)
+
+fig1= plot(t, sports$Attack, type = 'l', main = "Figure 1: Attack over Time t", 
+     xlab = "Time t (where t is each game played starting from 2003)", ylab = "Lebron's \"ATTACK\"")
+
+#Let's consider the very first two seasons (ends on 108th entry)
+
+fig2 = plot(t, sports$Attack, type = 'l', xlim=c(0,108), ylim = c(-.5, 1.7), main = "Figure 2: Attack over Time t (ranging from index 0 to 108)", 
+     xlab = "Time t",ylab = "Lebron's \"ATTACK\"")
+
+
+
+#fig.cap="Daily air conditioner sales for Chill-E-AC." <<--- FIGURE CAPTIONS
+
+```
+Initially, we do not see a clear pattern in the data (whether there's trend or seasonality) from Figure 1. We can assume that there is some bellshape curve function to this data since performance of a player rises and peaks, and falls drastically after their peak season. We can see that there is a large peak at his 600th game(which is the middle of the dataset) However, since Lebron is a GOAT, this pattern isn't largely bell-shaped. From Figure 2, if we zoom in for the first 108 games (two seasons from 2003 to 2004) we see a slight trend upwards toward 2014. It can be the case as Lebron's body continues to deter, his willingness to "ATTACK" declines and he will shoot further from the paint.
+
+
+## 2: Models Considered
+
+```{r echo = FALSE, message = FALSE, warning = FALSE, results = FALSE}
+library(lubridate)
+library(RQuantLib)
+sports$month = month(as.POSIXlt(sports$Date, format="%m/%d/%Y"))
+sports$newDate = mdy(sports$Date)
+sports$day =  weekdays(as.Date(sports$newDate))
+#sports$year = year(as.POSIXlt(sports$Date, format="%m/%d/%Y"))
+
+#for reference https://rdrr.io/cran/RQuantLib/man/Calendars.html
+sports$isBusiness = isBusinessDay("UnitedStates", sports$newDate)
+sports$isHoliday = isHoliday("UnitedStates", sports$newDate)
+sports$isEndOfMonth = isEndOfMonth("UnitedStates", sports$newDate)
+sports$isWeekend = isWeekend("UnitedStates", sports$newDate)
+```
+
+
+```{r echo = FALSE, out.width="210px", out.height="210px"}
+library(ggplot2)
+day_bp = ggplot(sports, aes(x=day, y = Attack)) +
+            geom_boxplot()
+
+day_bp + labs(title="Figure 1: Boxplots of \"Attack\" based on Day",x="Day of Week", y = "Attack Metric Score")
+
+month_bp = ggplot(sports, aes(x=factor(month), y = Attack)) +
+           geom_boxplot()
+
+month_bp + labs(title="Figure 2:Boxplots of \"Attack\" based on Month",x="Month of Week", y = "Attack Metric Score")
+
+```
+
+```{r echo = FALSE, out.width="215px", out.height="215px"}
+pgram = function(x, title){
+  m = floor(length(x)/2)
+  pgram = abs(fft(x)[2:(m+1)])^2/length(x)
+  plot(pgram, type = "h", main = title)
+  abline(h=0)
+  #return(pgram)
+}
+
+pgram(sports$Attack, "Figure 3: pgram of Attack")
+
+fig2 = plot(t, sports$Attack, type = 'p', xlim=c(0,108), ylim = c(-.5, 1.7), main = "Figure 4: Attack across t (Red Dots = Game Played On Weekend)", col = factor(sports$isWeekend), 
+     xlab = "Time t",ylab = "Lebron's \"ATTACK\"")
+```
+
+Seasonal effects can't be easily captured by certain periods (daily, monthly, etc) in Basketball since games are spaced out abstractly by the NBA. Additionally, games are not systematically controlled (a game at one certain day of a year may be under completely different conditions). For example, on the same day for 11/15, Lebron played against the 76ers in 2003, while against the Warriors in 2004 (his teammates and arena was different). Figure 1 and 2 above shows that there is no best month or day Lebron plays under. Figure 3 shows that the pgram has no single frequency to model its seasonility. Figure 4 shows that Lebron plays equally the same if it's a weekend or not.
+
+Since we cannot model it's seasonality using a sinusoidal model, we can try to capture the bell-shaped trend of "Attack" using the following parametric model:
+
+<font size = "+2">**2.1: Parametric Signal Model (Sinusoidal + Cubic Combination)**</font> 
+
+Let's first consider a Parametric Model. We known seasonality exists (due to the up and down nature of his "ATTACK" metric) and a trend also exists given the nature of a player's body deteriorating affecting how someone attacks the paint. We will capture the trend by including  time + time^2 + time^3 in the linear model to capture the bell-shaped effect  of a player's performance stated before. We will also set d = 162 (for the amount of total games in a season) and K = 23 (23 games per month, given there are 7 months in a season). 
+
+```{r echo =  FALSE, out.width="215px", out.height="215px"}
+#let's attempt modeling 23 games of each month (23*7 = 162 total games in a season)
+
+t = 1:nrow(sports)
+
+d=162
+K = 23 #assume 23 games per month (7 months for each season)
+sinMat = matrix(0, nrow = 1188, ncol = K)
+cosMat = matrix(0, nrow = 1188, ncol = K)
+for (i in 1:K){
+  sinMat[,i] = sin(2*pi*t*(i/d))
+  cosMat[,i] = cos(2*pi*t*(i/d))
+}
+timeSqr = t^2
+timeCube = t^3
+
+model_1a = lm(sports$Attack ~ (timeCube + timeSqr + t) * cosMat[,1] + cosMat[,2]
+             + cosMat[,3] +cosMat[,4] + cosMat[,5] + cosMat[,6] +cosMat[,7] + cosMat[,8]
+             + cosMat[,9] +cosMat[,10] + cosMat[,11] + cosMat[,12]
+             + cosMat[,13] +cosMat[,14] + cosMat[,15] + cosMat[,16]
+             + cosMat[,17] +cosMat[,18] + cosMat[,19] + cosMat[,20]
+             + cosMat[,21] + cosMat[,22] + cosMat[,23]
+             + sinMat[,1]+ sinMat[,2]+ sinMat[,3]+ sinMat[,4]+ sinMat[,5]+ sinMat[,6]+ sinMat[,7]+ sinMat[,8]
+            + sinMat[,9]+ sinMat[,10]+ sinMat[,11]+ sinMat[,12]
+            + sinMat[,13]+ sinMat[,14]+ sinMat[,15]+ sinMat[,16]
+            + sinMat[,17]+ sinMat[,18]+ sinMat[,19]+ sinMat[,20]
+            + sinMat[,21] + cosMat[,22] + cosMat[,23]
+)
+
+plot(t, sports$Attack, type = 'l', 
+      main = "Parametric Estimation (Using Sinusoidals and Time Interaction)", xlab = "time t", ylab = "Attack")
+lines(t,model_1a$fitted.values,lwd=2,col="cornflowerblue")
+
+
+plot(t, model_1a$residuals, type = 'l',main = "Residual plot (of Parametric Estimation) given game t", ylab = "Residual", col = 'indianred4')
+
+```
+
+The residuals look fairly stationary! However, we did not exclude certain spikes (that may be residuals) using indicators -- which can potentially help our model fairly. From this point, if we look at both the acf and pacf of the residuals from this parametric model we see that we do not need to include an ARMA model as the correlations look fairly like white noise (execept for one correlation at lag = 32 that we will address in our first model). Let's now check if ARMA is necessary or not given the following models.
+
+
+```{r echo = FALSE, out.width="225px", out.height="225px", warning = FALSE, silent = TRUE,message=FALSE,error=FALSE, results='hide',fig.keep='all'}
+library(astsa)
+library(forecast)
+
+#par(mfrow=c(1,2))
+m1 = model_1a$residuals
+acf2(m1, main = "Parametric Model (without ARMA): ACF & PACF")
+
+print_output <- function(output, cex = 1) {
+  tmp <- capture.output(output)
+  plot.new()
+  text(.5, 1, "Output: auto.arima(parametric model)", family = 'mono', cex = 1.25)
+  text(0, 1, paste(tmp, collapse='\n'), adj = c(0,2), family = 'mono', cex = cex)
+  box()
+}
+
+print_output(auto.arima(m1))
+```
+
+
+Additionally, we can see that auto.arima also suggests not to use any ARIMA at all, which we will test if this holds in the following models.
+
+<font size = "+2">**2.1.1:  Parametric Signal Model with SMA(1)[32]**</font> 
+
+From the original ACF plot, we see that there is only one correlation with high magnitude at lag = 32. Under this assumption, we can fit a very specific model since we do not think q = 32 is a very redundant model if the first 31 thetas are 0. We can then use a SMA(1)[32] to fit this model. However, it's unclear to really represent what this seasonal lag of 32 represents under the context of Lebron's ATTACK. If we look at Figure X (need to fix labeling of figures for final submission) the SARIMA diagnostics, we see that the ACF and PACF look like white noise expect for one high correlation at lag 74 for both plots. Besides that, the high p-values for all lags from the Ljung-Box suggest that this model fairly fits the data pretty well.
+
+
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE, results='hide',out.width="225px", out.height="225px", fig.show='hide'}
+m2a = sarima_wPACF(m1,p=3,d=0,q=0,S=37,P=0,D=0,Q=2)
+```
+
+
+<font size = "+2">**2.1.2:  Parametric Model Signal with AR(3) x SMA(2)[37]**</font> 
+
+To address the additional high correlation at lag 74, let's try fitting a AR(3) x SMA(2)[37] model to see if we can have all correlations fit within the blue confidence intervals in both plots. Unfortunately, even after attempting to fit a really complex model to eliminate this lag at 74 by using Q=2 for seasonal lag = 37, Figure Y shows that the high correlation still exists 
+
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE, results='hide',fig.keep='all',out.width="225px", out.height="225px"}
+library(astsa)
+m1a = sarima_wPACF(m1,p=0,d=0,q=0,S=32,P=0,D=0,Q=1)
+acf2(m2a$fit$residuals, max.lag = 80, main = "ACF and PACF of Parametric Model with AR(3) x SMA(2)[37]")
+
+```
+
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE, results='hide',fig.keep='all',out.width="225px", out.height="225px", fig.align = 'center'}
+
+#m2a = sarima_wPACF(m1,p=2,d=0,q=0,S=0,P=0,D=0,Q=0)
+```
+
+<font size = "+2">**2.2: Differencing **</font> 
+```{r, echo = FALSE, out.width="215px", out.height="215px"}
+
+#can't do log vst, or sqrt since negative x
+
+diffs = diff(sports$Attack, lag = 162) #same assumptions from last model, each season = 162 games
+t = 1:nrow(sports)
+plot.ts(t, sports$Attack, main = "Figure 1: Differencing Fitted Values", type = 'p', 
+     xlab = "Time t (Game)", ylab = "Lebron's \"Attack\"", col = ifelse(t < 160,'black','cornflowerblue'), pch = 19 )
+
+plot(diffs, type = "l", ylab = " Attack", xlab = "Time t (Game)", main = expression("Figure2: "*Delta*""[162]*"Attack"[t]), col = 'indianred4')
+```
+
+We can also use differencing with lag = 162 (capturing the seasonal effect as there are 162 games each season). It also isolates different performances among different teams as people tend to be traded before a new season starts (not usually mid-season). Figure 2 shows that the residuals of this seasonal dfiferencing model with lag 162 which look fairly stationary (despite certain spikes that are hard to isolate).
+
+If we look at Figure X below, we see that it is unclear what type of ARMA model best fits the residuals. The lags with the largest ACF values occurs at lag 18 and 40, while the lags with the largest PACF values occur at lag 18, 16, and 40. It's hard to determine whether there is remaining seasonality with a SARMA model, or if it's due by chance. 
+
+
+```{r echo = FALSE, out.width="225px", out.height="225px", warning = FALSE, silent = TRUE,message=FALSE,error=FALSE, results='hide',fig.keep='all'}
+
+#par(mfrow=c(1,2))
+acf2(diffs, main = "Differencing Model (without ARMA): ACF & PACF")
+
+print_output <- function(output, cex = 1) {
+  tmp <- capture.output(output)
+  plot.new()
+  text(.5, 1, "Output: auto.arima(differencing model)", family = 'mono', cex = 1.25)
+  text(0, 1.5, paste(tmp, collapse='\n'), adj = c(0,2), family = 'mono', cex = cex)
+  box()
+}
+
+print_output(auto.arima(diffs))
+```
+
+<font size = "+2">**2.2.1: Seasonal Differencing with ARIMA(2,0)**</font> 
+
+By following auto.arima, we will first use ARIMA(2,0) and then adjust with our next model. We see from the large magnitude correlations at lags 16 and 18 but do not repeat with seasonality, we set p = 2 with an additional first differencing to see if that eliminates any remaining seasonality. By looking at figure Z, we see that the the suggestion by auto.arima does really poorly, unable to capture the exponential decline in the PACF and the initial 5 lags for the ACF.
+
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE, results='hide',out.width="225px", out.height="225px", fig.show='hide'}
+m1b = sarima_wPACF(diffs,p=2,d=1,q=0,S=0,P=0,D=0,Q=0)
+```
+
+<font size = "+2">**2.2.2: Seasonal Differencing with ARMA(1,3)**</font> 
+
+To improve on the last model, the exponential decline in the PACF suggests this may be an AR(1), and the first three lags of the ACF suggest that this is an MA(3) model. By fitting an ARMA(1,3) we see that the ACF and PACF of the residuals look like fairly white noise. However, there still is a high magnitude correlation at lag=40, but to not further over-complicate the model, we will suggest this is due to noise from the data. The p-values are only high for lags 10-14, suggesting that the model is still not fitting the residuals well.
+
+
+```{r echo=FALSE,warning=FALSE,message=FALSE,error=FALSE, results='hide',fig.keep='all',out.width="225px", out.height="225px"}
+
+acf2(m1b$fit$residuals, max.lag = 80, main = "ACF and PACF of Seasonal Differencing Model with ARIMA(2,0)")
+m2b = sarima_wPACF(diffs,p=1,d=0,q=3,S=0,P=0,D=0,Q=0)
+
+```
+
+## 3. Model Comparison and Selection 
+
+
+<font size = "+2">**3.1: Model Comparison - Information Criterion**</font> 
+
+
+```{r echo = FALSE}
+
+
+if (FALSE) {
+print(paste("AIC model1:", m1a$AIC))
+print(paste("AIC model2:", m2a$AIC))
+print(paste("AIC model3:", m1b$AIC))
+print(paste("AIC model4:", m2b$AIC))
+
+print(paste("AICc model1:", m1a$AICc))
+print(paste("AICc model2:", m2a$AICc))
+print(paste("AICc model3:", m1b$AICc))
+print(paste("AICc model4:", m2b$AICc))
+
+print(paste("BIC model1:", m1a$BIC))
+print(paste("BIC model2:", m2a$BIC))
+print(paste("BIC model3:", m1b$BIC))
+print(paste("BIC model4:", m2b$BIC))
+}
+
+m_names = c("Parametric Signal Model with SMA(1)[32]", "Parametric Model Signal with AR(3) x SMA(2)[37]", 
+            "Seasonal Differencing with ARIMA(2,0)", "Seasonal Differencing with ARMA(1,3)")
+aic = c(m1a$AIC, m2a$AIC, m1b$AIC, m2b$AIC)
+aicc = c(m1a$AICc, m2a$AICc, m1b$AICc, m2b$AICc)
+bic = c(m1a$BIC, m2a$BIC, m1b$BIC, m2b$BIC)
+
+IC = data.frame("Models" = m_names, "AIC" = aic, "AICc" = aicc, "BIC" = bic)
+knitr::kable(IC)
+```
+
+
+<font size = "+2">**3.2: Model Selection - Cross Validation**</font> 
+
+The Cross-Validation used for the 4 models rolls through the last 100 games of all games from 10-30-2003 to 11-25-2016, in 10 game segments. I have also used RMSPE (root-mean-square prediction error) as the metric used for model selection for this CV.
+
+Tables A and B below show that the parametric model with SMA(1)[32] does the best overall among the four models, both based by the CV and IC comparison. Thus, we will use this model for future forecasting in Section 5.
+
+```{r warning = FALSE, silent = TRUE, fig.show='hide', echo = FALSE, include="false"}
+#Cross validation 
+
+
+library(forecast)
+library(astsa)
+
+sum_squared_errors <- c(model1=0, model2=0, model3=0, model4=0)
+  
+for (i in 10:1) {
+  train_set <- sports[1:(nrow(sports) - 10*i),]
+  test_set <- sports[(nrow(sports) - 10*i + 1):(nrow(sports) - 10*(i-1) ),]
+  N = nrow(train_set)
+  
+  
+  # Signal model 1
+  a = sports$Attack
+  
+  p_model = lm(sports$Attack ~ (timeCube + timeSqr + t) * cosMat[,1] + cosMat[,2]
+             + cosMat[,3] +cosMat[,4] + cosMat[,5] + cosMat[,6] +cosMat[,7] + cosMat[,8]
+             + cosMat[,9] +cosMat[,10] + cosMat[,11] + cosMat[,12]
+             + cosMat[,13] +cosMat[,14] + cosMat[,15] + cosMat[,16]
+             + cosMat[,17] +cosMat[,18] + cosMat[,19] + cosMat[,20]
+             + cosMat[,21] + cosMat[,22] + cosMat[,23]
+             + sinMat[,1]+ sinMat[,2]+ sinMat[,3]+ sinMat[,4]+ sinMat[,5]+ sinMat[,6]+ sinMat[,7]+ sinMat[,8]
+            + sinMat[,9]+ sinMat[,10]+ sinMat[,11]+ sinMat[,12]
+            + sinMat[,13]+ sinMat[,14]+ sinMat[,15]+ sinMat[,16]
+            + sinMat[,17]+ sinMat[,18]+ sinMat[,19]+ sinMat[,20]
+            + sinMat[,21] + cosMat[,22] + cosMat[,23])
+  
+  
+  signal.forecast1 = predict(p_model,test_set)[(nrow(sports) - 10*i + 1):(nrow(sports) - 10*(i-1) )]
+  noise.forecast1.1 = sarima.for(p_model$residuals, n.ahead=10, p=0,d=0,q=0,S=32,P=0,Q = 1)$pred
+  noise.forecast1.2 = sarima.for(p_model$residuals, n.ahead=10, p=3,d=0,S =37,q=2)$pred
+  forecast1.1 = signal.forecast1 + noise.forecast1.1
+  forecast1.2 = signal.forecast1 + noise.forecast1.2
+  
+  # Signal model 2 - Differencing
+  d_model = diff(sports$Attack, lag = 162)
+  noise.forecast2.1 = sarima.for(d_model,n.ahead=10,p=2,d=1,q=0,P=0,D=0,Q=0,S=0)$pred
+  noise.forecast2.2 = sarima.for(d_model,n.ahead=10,p=1,d=0,q=3,S=0,Q=0)$pred
+
+  forecast2.1 = numeric(10)
+  forecast2.2 = numeric(10)
+  for(i in 1:7){
+          forecast2.1[i] = noise.forecast2.1[i] + train_set$Attack[N+i-162]
+          forecast2.2[i] = noise.forecast2.2[i] + train_set$Attack[N+i-162]
+                    
+  }
+  for(i in 8:10){
+          forecast2.1[i] = noise.forecast2.1[i] + forecast2.1[i-162] + train_set$Attack[N+i-365]
+          forecast2.2[i] = noise.forecast2.2[i] + forecast2.2[i-162]+ train_set$Attack[N+i-162]
+  }
+
+
+  #
+  sum_squared_errors[1] = sum_squared_errors[1] + sum((forecast1.1 - test_set$Attack)^2)
+  sum_squared_errors[2] = sum_squared_errors[2] + sum((forecast1.2 - test_set$Attack)^2)
+  sum_squared_errors[3] = sum_squared_errors[3] + sum((forecast2.1 - test_set$Attack)^2)
+  sum_squared_errors[4] = sum_squared_errors[4] + sum((forecast2.2 - test_set$Attack)^2)
+}
+
+```
+
+
+```{r rmsetable, echo = FALSE}
+#RMSE table
+rmse = matrix(sqrt(sum_squared_errors/180), nrow=4,ncol = 1)
+colnames(rmse) = "RMSPE"
+rownames(rmse) = c("Parametric Signal Model with SMA(1)[32]", "Parametric Model Signal with AR(3) x SMA(2)[37]", 
+            "Seasonal Differencing with ARIMA(2,0)", "Seasonal Differencing with ARMA(1,3)")
+knitr::kable(rmse,caption = "Cross-validated out-of-sample root mean squared prediction error for the four models under consideration.")
+```
+
+## 4. Results
+
+**Eq 1: Parametric Model using Sinuosoids and Time Interaction (where K = 23, d = 162)**
+
+$$Y_t = \sum_{k=1}^{K} (a{_k}cos(2{\pi}tk/d)+b{_k}sin(2{\pi}tk/d))*(t+t{^2}+t{^3})$$  
+
+**Eq 2: SMA(1)[32]**
+
+$$X_t = W_t + \theta_1 W_{t-32}$$ 
+
+
+ $\color{red}{\text{Disclaimer:}}$ I have no idea how to control where tables end up after knitting the document in rMarkdown. For some reason kables cannot be glued on, even when researching how styling works through online documentation. You can see that the model parameters for the parametric model appears after the Forecasting, and I have no idea how to control it.
+
+<font size = "+2">**4.1: Results -  Estimation of model parameters**</font> 
+
+ 
+
+```{r echo = FALSE}
+kable(m1a$ttable[,1:2])
+
+
+
+
+
+#kable_styling(test, latex_options = "hold_position")
+```
+
+
+
+<font size = "+2">**4.1: Results -  Prediction **</font> 
+
+The following uses the **Parametric Model with SMA(1)[32]** to predict Lebron's "ATTACK" in his next ten games following 11-25-2016.
+
+```{r forecasts, out.width = "60%", fig.align = 'center', echo = FALSE, silent = TRUE, warning = FALSE, message = FALSE,fig.cap='Forecasts of Lebron James Attack for his next 10 games following 11-25-2016.. The x-axis would ideally be dates of the games instead of "t"'}
+
+
+# helpful for lm to create new dataframe with covariates for next 10 obs
+# this is a bit complicated for me as I made new variables. 
+sports2 = tail(sports,10)[,c(1,2)]
+sports2$Attack = sports2$Attack + 10
+
+signal.forecast1 = predict(model_1a,sports2)[1178:1188]
+
+# However, this way makes it easier to make a nicer plot. 
+Attack = sports$Attack
+attempt = sarima.for(Attack, n.ahead=10, p=0,d=0,q=0, S= 32, Q= 1, xreg = model_1a$fitted.values, newxreg = signal.forecast1)$pred
+# You'll then want to output forecast1.2 (or attempt) to csv file in the CORRECT/specific format discussed on the assignment! 
+
+
+```
+
+```{r echo = FALSE}
+s = summary(model_1a)
+library(knitr)
+
+t1 = s$coefficients[1:25,1:2]
+t2 = s$coefficients[26:51,1:2]
+
+kable(list(t1,t2), longtable = FALSE)
+```
+
