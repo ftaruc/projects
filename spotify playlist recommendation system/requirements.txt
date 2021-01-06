@@ -1,0 +1,6 @@
+nltk
+spotipy
+vaderSentiment
+textblob
+lyricsgenius
+seaborn
