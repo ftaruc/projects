@@ -1,0 +1,52 @@
+[9560:5244:0315/212510.104:INFO:CONSOLE(213)] "DEPRECATED", source: https://www.grailed.com/ (213)
+[9560:5244:0315/212510.104:INFO:CONSOLE(213)] "DEPRECATED", source: https://www.grailed.com/ (213)
+[9560:5244:0315/212510.104:INFO:CONSOLE(220)] "DEPRECATED", source: https://www.grailed.com/ (220)
+[9560:5244:0315/212510.105:INFO:CONSOLE(213)] "DEPRECATED", source: https://www.grailed.com/ (213)
+[9560:5244:0315/212510.174:INFO:CONSOLE(16)] "
+%cLooking for a job? We're hiring.
+%cExplore engineering opportunities at https://www.grailed.com/jobs font-family: 'Times New Roman', serif; font-size: 1.6rem; line-height: 1.5; letter-spacing: .025rem; color: #4a4a4a;font-family: 'Times New Roman', serif; font-size: 1rem; line-height: 1.5; letter-spacing: .025rem;", source: https://www.grailed.com/javascripts/vendors~homepage.grailed.2ba23d9e890b75baae2f.js (16)
+[9560:5244:0315/212510.384:INFO:CONSOLE(16)] "%cDEPRECATED%c: Please get %ctrack%c from %cuseAnalytics%c. font-weight: bold font-weight: unset font-weight: bold font-weight: unset font-weight: bold font-weight: unset", source: https://www.grailed.com/javascripts/vendors~homepage.grailed.2ba23d9e890b75baae2f.js (16)
+[9560:5244:0315/212510.771:INFO:CONSOLE(16)] "%cDEPRECATED%c: Please get %cidentify%c from %cuseAnalytics%c. font-weight: bold font-weight: unset font-weight: bold font-weight: unset font-weight: bold font-weight: unset", source: https://www.grailed.com/javascripts/vendors~homepage.grailed.2ba23d9e890b75baae2f.js (16)
+[9560:5244:0315/212510.776:INFO:CONSOLE(16)] "%cDEPRECATED%c: Please get %ctrack%c from %cuseAnalytics%c. font-weight: bold font-weight: unset font-weight: bold font-weight: unset font-weight: bold font-weight: unset", source: https://www.grailed.com/javascripts/vendors~homepage.grailed.2ba23d9e890b75baae2f.js (16)
+[9560:5244:0315/212513.198:INFO:CONSOLE(1)] "[OPTIMIZELY] - INFO  2021-03-16T04:25:13.197Z PROJECT_CONFIG: Skipping JSON schema validation.", source: https://www.grailed.com/javascripts/vendors~client~editorial~internal~listing.grailed.244f21aa38f7d3c1ca10.js (1)
+[9560:5244:0315/212513.213:INFO:CONSOLE(205)] "DEPRECATED", source: https://www.grailed.com/shop/Qc8-BPckFw (205)
+[9560:5244:0315/212513.213:INFO:CONSOLE(205)] "DEPRECATED", source: https://www.grailed.com/shop/Qc8-BPckFw (205)
+[9560:5244:0315/212513.214:INFO:CONSOLE(212)] "DEPRECATED", source: https://www.grailed.com/shop/Qc8-BPckFw (212)
+[9560:5244:0315/212513.214:INFO:CONSOLE(205)] "DEPRECATED", source: https://www.grailed.com/shop/Qc8-BPckFw (205)
+[9560:5244:0315/212513.215:INFO:CONSOLE(205)] "DEPRECATED", source: https://www.grailed.com/shop/Qc8-BPckFw (205)
+[9560:5244:0315/212513.234:INFO:CONSOLE(16)] "
+%cLooking for a job? We're hiring.
+%cExplore engineering opportunities at https://www.grailed.com/jobs font-family: 'Times New Roman', serif; font-size: 1.6rem; line-height: 1.5; letter-spacing: .025rem; color: #4a4a4a;font-family: 'Times New Roman', serif; font-size: 1rem; line-height: 1.5; letter-spacing: .025rem;", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212513.301:INFO:CONSOLE(16)] "[OPTIMIZELY] - ERROR 2021-03-16T04:25:13.300Z OPTIMIZELY: Provided user_id is in an invalid format.", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212513.578:INFO:CONSOLE(16)] "[OPTIMIZELY] - INFO  2021-03-16T04:25:13.578Z DECISION_SERVICE: Audiences for rule Everyone Else collectively evaluated to TRUE.", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212513.578:INFO:CONSOLE(16)] "[OPTIMIZELY] - INFO  2021-03-16T04:25:13.578Z OPTIMIZELY: Feature trending_feed is enabled for user 6400173.", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212513.579:INFO:CONSOLE(16)] "[OPTIMIZELY] - INFO  2021-03-16T04:25:13.579Z DECISION_SERVICE: Audiences for rule Everyone Else collectively evaluated to TRUE.", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212513.579:INFO:CONSOLE(16)] "[OPTIMIZELY] - INFO  2021-03-16T04:25:13.579Z OPTIMIZELY: Got variable value "heat" for variable "heat_variant" of feature flag "trending_feed"", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212513.643:INFO:CONSOLE(16)] "%cDEPRECATED%c: Please get %cidentify%c from %cuseAnalytics%c. font-weight: bold font-weight: unset font-weight: bold font-weight: unset font-weight: bold font-weight: unset", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212513.649:INFO:CONSOLE(16)] "%cDEPRECATED%c: Please get %ctrack%c from %cuseAnalytics%c. font-weight: bold font-weight: unset font-weight: bold font-weight: unset font-weight: bold font-weight: unset", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212526.315:INFO:CONSOLE(1)] "[OPTIMIZELY] - INFO  2021-03-16T04:25:26.314Z PROJECT_CONFIG: Skipping JSON schema validation.", source: https://www.grailed.com/javascripts/vendors~client~editorial~internal~listing.grailed.244f21aa38f7d3c1ca10.js (1)
+[9560:5244:0315/212526.327:INFO:CONSOLE(202)] "DEPRECATED", source: https://www.grailed.com/messages (202)
+[9560:5244:0315/212526.327:INFO:CONSOLE(202)] "DEPRECATED", source: https://www.grailed.com/messages (202)
+[9560:5244:0315/212526.327:INFO:CONSOLE(209)] "DEPRECATED", source: https://www.grailed.com/messages (209)
+[9560:5244:0315/212526.327:INFO:CONSOLE(202)] "DEPRECATED", source: https://www.grailed.com/messages (202)
+[9560:5244:0315/212526.328:INFO:CONSOLE(202)] "DEPRECATED", source: https://www.grailed.com/messages (202)
+[9560:5244:0315/212526.349:INFO:CONSOLE(16)] "
+%cLooking for a job? We're hiring.
+%cExplore engineering opportunities at https://www.grailed.com/jobs font-family: 'Times New Roman', serif; font-size: 1.6rem; line-height: 1.5; letter-spacing: .025rem; color: #4a4a4a;font-family: 'Times New Roman', serif; font-size: 1rem; line-height: 1.5; letter-spacing: .025rem;", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212526.653:INFO:CONSOLE(16)] "%cDEPRECATED%c: Please get %cidentify%c from %cuseAnalytics%c. font-weight: bold font-weight: unset font-weight: bold font-weight: unset font-weight: bold font-weight: unset", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212526.656:INFO:CONSOLE(16)] "%cDEPRECATED%c: Please get %ctrack%c from %cuseAnalytics%c. font-weight: bold font-weight: unset font-weight: bold font-weight: unset font-weight: bold font-weight: unset", source: https://www.grailed.com/javascripts/client.grailed.6a929cd8fdc1c44e4f37.js (16)
+[9560:5244:0315/212528.223:INFO:CONSOLE(213)] "DEPRECATED", source: https://www.grailed.com/ (213)
+[9560:5244:0315/212528.223:INFO:CONSOLE(213)] "DEPRECATED", source: https://www.grailed.com/ (213)
+[9560:5244:0315/212528.224:INFO:CONSOLE(220)] "DEPRECATED", source: https://www.grailed.com/ (220)
+[9560:5244:0315/212528.224:INFO:CONSOLE(213)] "DEPRECATED", source: https://www.grailed.com/ (213)
+[9560:5244:0315/212528.254:INFO:CONSOLE(16)] "
+%cLooking for a job? We're hiring.
+%cExplore engineering opportunities at https://www.grailed.com/jobs font-family: 'Times New Roman', serif; font-size: 1.6rem; line-height: 1.5; letter-spacing: .025rem; color: #4a4a4a;font-family: 'Times New Roman', serif; font-size: 1rem; line-height: 1.5; letter-spacing: .025rem;", source: https://www.grailed.com/javascripts/vendors~homepage.grailed.2ba23d9e890b75baae2f.js (16)
+[9560:5244:0315/212528.335:INFO:CONSOLE(16)] "%cDEPRECATED%c: Please get %ctrack%c from %cuseAnalytics%c. font-weight: bold font-weight: unset font-weight: bold font-weight: unset font-weight: bold font-weight: unset", source: https://www.grailed.com/javascripts/vendors~homepage.grailed.2ba23d9e890b75baae2f.js (16)
+[9560:5244:0315/212528.689:INFO:CONSOLE(16)] "%cDEPRECATED%c: Please get %cidentify%c from %cuseAnalytics%c. font-weight: bold font-weight: unset font-weight: bold font-weight: unset font-weight: bold font-weight: unset", source: https://www.grailed.com/javascripts/vendors~homepage.grailed.2ba23d9e890b75baae2f.js (16)
+[9560:5244:0315/212528.692:INFO:CONSOLE(16)] "%cDEPRECATED%c: Please get %ctrack%c from %cuseAnalytics%c. font-weight: bold font-weight: unset font-weight: bold font-weight: unset font-weight: bold font-weight: unset", source: https://www.grailed.com/javascripts/vendors~homepage.grailed.2ba23d9e890b75baae2f.js (16)
+[13444:17368:0315/213220.626:ERROR:cache_util_win.cc(20)] Unable to move the cache: Access is denied. (0x5)
+[13444:17368:0315/213220.626:ERROR:cache_util.cc(144)] Unable to move cache folder C:\Users\ferdi\downloads\projects\grailed\selenium\ShaderCache\GPUCache to C:\Users\ferdi\downloads\projects\grailed\selenium\ShaderCache\old_GPUCache_000
+[13444:17368:0315/213220.626:ERROR:disk_cache.cc(184)] Unable to create cache
+[13444:17368:0315/213220.626:ERROR:shader_disk_cache.cc(606)] Shader Cache Creation failed: -2
+[9560:5244:0315/220322.220:WARNING:pref_notifier_impl.cc(40)] Pref observer for media_router.cast_allow_all_ips found at shutdown.

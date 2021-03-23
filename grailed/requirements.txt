@@ -1,0 +1,13 @@
+streamlit
+numpy
+pandas
+altair
+time
+selenium
+bs4
+matplotlib.pyplot
+re
+sys
+datefinder
+pickle
+fake_useragent
