@@ -3,31 +3,6 @@ import numpy as np
 import pandas as pd
 import altair as alt
 import time
-#Import packages
-import pandas as pd
-import numpy as np
-#import matplotlib.pyplot as plt
-import re
-import time
-import sys
-import requests
-import datefinder
-import pickle
-#selenium
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import Chrome
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.common.by import By
-#bs4
-from bs4 import BeautifulSoup
-from fake_useragent import UserAgent
 import sel
 import utils
 
